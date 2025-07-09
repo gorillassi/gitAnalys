@@ -3,7 +3,7 @@ package analyzer
 import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
-	
+	"strings"
 )
 
 type AuthorStats struct {
@@ -15,7 +15,7 @@ type AuthorStats struct {
 	Files        map[string]struct{}
 }
 
-func AnalyzeRepo(path string) (map[string]*AuthorStats, error) {
+func AnalyzeRepo(path string, extFilter string) (map[string]*AuthorStats, error) {
 	stats := make(map[string]*AuthorStats)
 
 	repo, err := git.PlainOpen(path)
@@ -49,6 +49,10 @@ func AnalyzeRepo(path string) (map[string]*AuthorStats, error) {
 			parent, _ := c.Parents().Next()
 			patch, _ := parent.Patch(c)
 			for _, fileStat := range patch.Stats() {
+				if extFilter != "" && !strings.HasSuffix(fileStat.Name, extFilter) {
+					continue 
+				}
+
 				stats[author].LinesAdded += fileStat.Addition
 				stats[author].LinesDeleted += fileStat.Deletion
 				stats[author].Files[fileStat.Name] = struct{}{}

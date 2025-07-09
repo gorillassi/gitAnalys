@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func PrintStats(stats map[string]*analyzer.AuthorStats) {
+func PrintStats(stats map[string]*analyzer.AuthorStats, sortBy string) {
 	headers := []string{"Author", "Commits", "Lines Added", "Lines Deleted", "Files Changed"}
 
 	rows := [][]string{}
@@ -22,7 +22,14 @@ func PrintStats(stats map[string]*analyzer.AuthorStats) {
 	}
 
 	sort.Slice(rows, func(i, j int) bool {
-		return rows[i][2] > rows[j][2]
+		switch sortBy {
+		case "commits":
+			return rows[i][1] > rows[j][1]
+		case "name":
+			return rows[i][0] < rows[j][0]
+		default: // "lines"
+			return rows[i][2] > rows[j][2]
+		}
 	})
 
 	widths := make([]int, len(headers))
